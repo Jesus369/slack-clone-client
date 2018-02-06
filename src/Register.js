@@ -4,56 +4,82 @@ import gql from 'graphql-tag'
 import React from 'react';
 
 class Register extends React.Component {
-  constructor(props) {
-    super(props)
-    this.onChange = this.onChange.bind(this)
-    this.onSubmit = this.onSubmit.bind(this)
-  }
 
   state = {
     username: '',
+    usernameError: '',
     email: '',
+    emailError: '',
     password: '',
+    passwordError: '',
   };
 
-  onChange(e) {
+  onChange = (e) => {
     const { name, value } = e.target
     this.setState({ [name]: value })
   }
 
   onSubmit = async () => {
-    const response = await this.props.mutate({
-      variables: this.state,
+    /**/
+    this.setState({
+      usernameError: '',
+      emailError: '',
+      passwordError: ''
     })
+    /*Setting the state*/
+    const { username, email, password } = this.state
+    /*Creating a user with the given variables*/
+    const response = await this.props.mutate({
+      variables: { username, email, password }
+    })
+    /*passing in a boolean and all errors*/
+    const { ok, errors } = response.data.register /*find by console.logging the response*/
+    if (ok) {
+      /* if ok(true) redirect to homepage*/
+      this.props.history.push('/')
+    } else {
+      const err = {};
+      /*looping through each path and message in errors*/
+      errors.forEach(({ path, message }) => {
+        /*err[passwordError] = message*/
+        err[`${path}Error`] = message
+      })
+      console.log('err', err)
+      this.setState(err)
+    }
     console.log(response)
   }
 
   render() {
-    const { username, email, password } = this.state;
+    const { username, email, password, usernameError, emailError, passwordError } = this.state;
 
     return (
       <Container text>
         <Header as='h2'>Register</Header>
         <Input
-          name="username"
+          /*Double "!" => boolean. error requires Boolean*/
+          error={!!usernameError}
+          name='username'
           onChange={this.onChange}
           value={username}
-          placeholder="Username"
+          placeholder='Username'
           fluid
         />
         <Input
-          name="email"
+          error={!!emailError}
+          name='email'
           onChange={this.onChange}
           value={email}
-          placeholder="Email"
+          placeholder='Email'
           fluid
         />
         <Input
-          name="password"
+          error={!!passwordError}
+          name='password'
           onChange={this.onChange}
           value={password}
-          type="password"
-          placeholder="Password"
+          type='password'
+          placeholder='Password'
           fluid
         />
         <Button onClick={this.onSubmit}>Submit</Button>
@@ -62,10 +88,16 @@ class Register extends React.Component {
   }
 }
 
-const registeMutation = gql`
+const registerMutation = gql`
   mutation($username: String!, $email: String!, $password: String!) {
-    register(username: $username, email: $email, password: $password)
-  }
+    register(username: $username, email: $email, password: $password) {
+      ok
+      errors {
+          path 
+          message
+        }
+      }
+    }
 `
 
-export default graphql(registeMutation)(Register);
+export default graphql(registerMutation)(Register);
