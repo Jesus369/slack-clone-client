@@ -5,8 +5,6 @@ import { observer } from 'mobx-react';
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 
-/**/
-
 class Login extends React.Component {
     constructor(props) {
         super(props)
@@ -31,8 +29,8 @@ class Login extends React.Component {
 
         /*Store the token and refreshToken in the user's local storage*/
         if (ok) {
-            localStorage.setItem = ('token', token)
-            localStorage.setItem = ('refreshToken', refreshToken)
+            localStorage.setItem('token', token)
+            localStorage.setItem('refreshToken', refreshToken)
 
             /* if ok(true) redirect to homepage*/
             this.props.history.push('/')
